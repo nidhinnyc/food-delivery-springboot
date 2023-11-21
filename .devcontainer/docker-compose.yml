@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  fooddelivery:
+    container_name: fooddelivery
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:      
+        MYSQL_ROOT_PASSWORD: Pass@123        
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity    
+    network_mode: service:db
+  db:
+    container_name: learning-mysql
+    platform: linux/x86_64
+    image: percona:8.0
+    privileged: true
+    restart: always
+    volumes:
+      - learning-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Pass@123
+    ports:
+      - 3306:3306
+    networks:
+      - learning-nw
+networks:
+  learning-nw:
+volumes:
+  learning-data:

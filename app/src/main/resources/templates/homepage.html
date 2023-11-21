@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>userHome</title>
+  <link rel="stylesheet" href="home.css">
+</head>
+ 
+<body>
+ 
+  <div class="navbar">
+    <div class="logo">
+      <img src="logo.png" alt="Logo" class="logo-img">
+    </div>
+    <div class="nav-links">
+      <ul>
+        <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+        <li><a href="#"><i class="fas fa-address-book"></i> Contact</a></li>
+        <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+      </ul>
+    </div>
+  </div>
+ 
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">XYZzz</h1>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search Restaurants...">
+        <button onclick="searchRestaurants()">
+          Search
+        </button>
+      </div>
+    </div>
+  </header>
+ 
+  <main class="main-content">
+    <section class="restaurants">
+      <h2 class="section-title">Browse Restaurants</h2>
+      <div id="restaurantList" class="restaurant-list">
+        <!-- Restaurant buttons will be dynamically added here -->
+      </div>
+    </section>
+ 
+    <section class="menu">
+      <h2 class="section-title">Menu</h2>
+      <div id="menuItems" class="menu-items">
+        <!-- Menu items will be dynamically added here -->
+      </div>
+    </section>
+ 
+    <aside class="cart">
+      <h2 class="section-title">Cart</h2>
+      <ul id="cartItems" class="cart-items">
+        <!-- Cart items will be dynamically added here -->
+      </ul>
+      <div class="total-amount">
+        <span>Total: &#x20B9;</span><span id="totalAmount">0.00</span>
+      </div>
+      <button id="checkoutBtn" class="checkout-btn">Checkout</button>
+    </aside>
+  </main>
+ 
+ 
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <p>Rights Reserved &copy; 2023</p>
+      </div>
+      <div class="footer-right">
+        <a href="#" id="career-link">Career</a>
+        <a href="#" id="career-link">Partner</a>
+        <a href="#" id="about-link">About Us</a>
+        <a href="#" id="contact-link">Contact Us</a>
+      </div>
+    </div>
+  </footer>
+ 
+  <script>
+    // Sample restaurant data with their menus (Replace this with your actual data)
+    const restaurantData = [
+      {
+        id: 1,
+        name: 'Restaurant A',
+        menu: [
+          { id: 1, name: 'Pizza', price: 190 },
+          { id: 2, name: 'Pasta', price: 160 },
+          { id: 3, name: 'Beef Fry', price: 150 },
+          { id: 4, name: 'Chicken Burger', price: 180 },
+          { id: 5, name: 'Veg Noodles', price: 120 },
+          { id: 6, name: 'Club Sandwich', price: 140 },
+          { id: 7, name: 'Chicken Shawarma', price: 90 },
+          // Add more items for Restaurant A
+        ]
+      },
+      {
+        id: 2,
+        name: 'Restaurant B',
+        menu: [
+          { id: 1, name: 'Lemon Juice', price: 20 },
+          { id: 2, name: 'Mango Juice', price: 60 },
+          { id: 3, name: 'Oreo Shake', price: 80 },
+          { id: 4, name: 'Fresh Juice', price: 70 },
+          { id: 5, name: 'Mojito', price: 90 },
+          { id: 6, name: 'Apple Juice', price: 60 },
+          // Add more items for Restaurant B
+        ]
+      },
+      // Add more restaurants as needed
+    ];
+    // Function to display list of restaurants
+  function displayRestaurants(restaurants) {
+    const restaurantList = document.getElementById('restaurantList');
+    restaurantList.innerHTML = '';
+ 
+    restaurants.forEach(restaurant => {
+      const restaurantItem = document.createElement('div');
+      restaurantItem.classList.add('restaurant-item');
+      restaurantItem.innerHTML = `<button onclick="displayMenu(${restaurant.id})">${restaurant.name}</button>`;
+      restaurantList.appendChild(restaurantItem);
+    });
+  }
+ 
+  // Rest of your existing JavaScript code...
+ 
+  // Initialize restaurant display
+  displayRestaurants(restaurantData);
+    // Function to display menu for a selected restaurant
+    function displayMenu(restaurantId) {
+      const selectedRestaurant = restaurantData.find(restaurant => restaurant.id === restaurantId);
+ 
+      const menuContainer = document.getElementById('menuItems');
+      menuContainer.innerHTML = '';
+ 
+      selectedRestaurant.menu.forEach(item => {
+        const menuItem = document.createElement('div');
+        menuItem.classList.add('menu-item');
+        menuItem.innerHTML = `
+          <p>${item.name} - &#x20B9;${item.price}</p>
+          <button onclick="addToCart('${item.name}', ${item.price})">Add to Cart</button>
+        `;
+        menuContainer.appendChild(menuItem);
+      });
+    }
+  // Function to add items to the cart and update quantity in menu
+  function addToCart(name, price) {
+    const cart = document.getElementById('cartItems');
+    let cartItem = cart.querySelector(`li[data-name="${name}"]`);
+ 
+    if (!cartItem) {
+      cartItem = document.createElement('li');
+      cartItem.dataset.name = name;
+      cartItem.dataset.price = price;
+      cartItem.dataset.quantity = 1;
+      cartItem.innerHTML = `${name} - &#x20B9;${price} x <span class="quantity">${cartItem.dataset.quantity}</span>`;
+      cart.appendChild(cartItem);
+    } else {
+      const quantity = parseInt(cartItem.dataset.quantity) + 1;
+      cartItem.dataset.quantity = quantity;
+      cartItem.querySelector('.quantity').textContent = quantity;
+    }
+ 
+    updateTotalAmount(); // Update total amount in the cart
+    updateQuantityInMenu(name); // Update quantity in the menu
+  }
+ 
+  // Function to increment quantity and update total amount
+  function incrementQuantity(element, price) {
+    const menuItem = element.closest('.menu-item');
+    const name = menuItem.querySelector('p').textContent.split(' - ')[0];
+    addToCart(name, price);
+  }
+ 
+  // Function to decrement quantity and update total amount
+  function decrementQuantity(element, price) {
+    const menuItem = element.closest('.menu-item');
+    const name = menuItem.querySelector('p').textContent.split(' - ')[0];
+    const cart = document.getElementById('cartItems');
+    const cartItem = cart.querySelector(`li[data-name="${name}"]`);
+ 
+    if (cartItem) {
+      let quantity = parseInt(cartItem.dataset.quantity);
+      if (quantity > 0) {
+        quantity--;
+        cartItem.dataset.quantity = quantity;
+        cartItem.querySelector('.quantity').textContent = quantity;
+        updateTotalAmount(-price); // Update total amount by subtracting the price
+        updateQuantityInMenu(name); // Update quantity in the menu
+      }
+    }
+  }
+ 
+  // Function to increment quantity and update total amount
+  function incrementQuantity(element, price) {
+    const menuItem = element.closest('.menu-item');
+    const name = menuItem.querySelector('p').textContent.split(' - ')[0];
+    addToCart(name, price);
+  }
+ 
+  // Function to update the total amount in the cart
+  function updateTotalAmount() {
+    const cartItems = document.getElementById('cartItems').children;
+    let totalPrice = 0;
+ 
+    Array.from(cartItems).forEach(item => {
+      const price = parseFloat(item.dataset.price);
+      const quantity = parseInt(item.dataset.quantity);
+      totalPrice += price * quantity;
+    });
+ 
+    const totalAmountElement = document.getElementById('totalAmount');
+    totalAmountElement.textContent = totalPrice.toFixed(2);
+  }
+    // Function to update the quantity in the menu
+    function updateQuantityInMenu(name) {
+    const menuItems = document.querySelectorAll('.menu-item p');
+    menuItems.forEach(item => {
+      const itemName = item.textContent.split(' - ')[0];
+      if (itemName === name) {
+        const quantity = parseInt(item.querySelector('.quantity').textContent) + 1;
+        item.querySelector('.quantity').textContent = quantity;
+      }
+    });
+  }
+ 
+  // Function to increment quantity and update total amount
+  function incrementQuantity(element, price) {
+    const menuItem = element.closest('.menu-item');
+    const name = menuItem.querySelector('p').textContent.split(' - ')[0];
+    addToCart(name, price);
+  }
+ 
+  // Function to update the total amount in the cart
+  function updateTotalAmount() {
+    const cartItems = document.getElementById('cartItems').children;
+    let totalPrice = 0;
+ 
+    Array.from(cartItems).forEach(item => {
+      const price = parseFloat(item.dataset.price);
+      const quantity = parseInt(item.dataset.quantity);
+      totalPrice += price * quantity;
+    });
+ 
+    const totalAmountElement = document.getElementById('totalAmount');
+    totalAmountElement.textContent = totalPrice.toFixed(2);
+  }
+    // Function to display menu for a selected restaurant
+    function displayMenu(restaurantId) {
+    const selectedRestaurant = restaurantData.find(restaurant => restaurant.id === restaurantId);
+ 
+    const menuContainer = document.getElementById('menuItems');
+    menuContainer.innerHTML = '';
+ 
+    selectedRestaurant.menu.forEach(item => {
+      const menuItem = document.createElement('div');
+      menuItem.classList.add('menu-item');
+      menuItem.innerHTML = `
+        <p>${item.name} - &#x20B9;${item.price}</p>
+        <div class="item-actions">
+          <button onclick="addToCart('${item.name}', ${item.price})">Add to Cart</button>
+          <div class="quantity">
+            <button onclick="decrementQuantity(this, ${item.price})">-</button>
+            <span class="quantity-value">0</span>
+            <button onclick="incrementQuantity(this, ${item.price})">+</button>
+          </div>
+        </div>
+      `;
+      menuContainer.appendChild(menuItem);
+    });
+  }
+ 
+    </script>
+</body>
+ 
+</html>
+ 
+has context menu
